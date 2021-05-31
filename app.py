@@ -261,13 +261,13 @@ def create_venue_submission():
     address = request.form['address']
     phone = request.form['phone']
     image_link = request.form['image_link']
-    genres = request.form['genres']
+    genres = request.form.getlist('genres')
     facebook_link = request.form['facebook_link']
     website_link = request.form['website_link']
-    seeking_talent = request.form['seeking_talent']
+    seeking_talent = True if 'seeking_talent' in request.form else False
     seeking_description = request.form['seeking_description']
     venue = Venue(name=name, city=city, state=state, address=address, phone=phone, image_link=image_link,
-                  genres=genres, facebook_link=facebook_link, website_link=website_link, seeking_talent=seeking_talent,
+                  genres=genres, facebook_link=facebook_link, website=website_link, seeking_talent=seeking_talent,
                   seeking_description=seeking_description)
     db.session.add(venue)
     db.session.commit()
@@ -276,13 +276,14 @@ def create_venue_submission():
     error = True
     db.session.rollback()
     print(sys.exc_info())
-    flash('An error occurred. Venue ' + request.name + ' could not be listed.')
+    flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')
 
   finally:
     db.session.close()
 
   # on successful db insert, flash success
-  flash('Venue ' + request.form['name'] + ' was successfully listed!')
+  if error == False:
+    flash('Venue ' + request.form['name'] + ' was successfully listed!')
   return render_template('pages/home.html')
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
@@ -478,13 +479,13 @@ def create_artist_submission():
     state = request.form['state']
     phone = request.form['phone']
     image_link = request.form['image_link']
-    genres = request.form['genres']
+    genres = request.form.getlist('genres')
     facebook_link = request.form['facebook_link']
     website_link = request.form['website_link']
-    seeking_venue = request.form['seeking_venue']
+    seeking_venue = True if 'seeking_venue' in request.form else False
     seeking_description = request.form['seeking_description']
     artist = Artist(name=name, city=city, state=state, phone=phone, image_link=image_link,
-                  genres=genres, facebook_link=facebook_link, website_link=website_link, seeking_venue=seeking_venue,
+                  genres=genres, facebook_link=facebook_link, website=website_link, seeking_venue=seeking_venue,
                   seeking_description=seeking_description)
     db.session.add(artist)
     db.session.commit()
@@ -497,7 +498,8 @@ def create_artist_submission():
     db.session.close()
 
   # on successful db insert, flash success
-  flash('Artist ' + request.form['name'] + ' was successfully listed!')
+  if error == False:
+    flash('Artist ' + request.form['name'] + ' was successfully listed!')
   return render_template('pages/home.html')
 
 #  Shows
@@ -573,7 +575,8 @@ def create_show_submission():
     db.session.close()
 
   # on successful db insert, flash success
-  flash('Show was successfully listed!')
+  if error == False:
+    flash('Show was successfully listed!')
   return render_template('pages/home.html')
 
 @app.errorhandler(404)
